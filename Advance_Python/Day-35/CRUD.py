@@ -1,1 +1,0 @@
-# Creating CRUD operations using python
