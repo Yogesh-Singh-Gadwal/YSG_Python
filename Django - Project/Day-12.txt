@@ -1,0 +1,408 @@
+Chapter - 36  Bank-Data-APP
+--------------------------------------
+
+Step-1 create new app 
+-------------------------------
+==> python manage.py startapp bankdata
+
+
+Step-2 settings.py
+------------------------
+
+==> # Application definition
+
+INSTALLED_APPS = [
+    'django.contrib.admin',
+    'django.contrib.auth',
+    'django.contrib.contenttypes',
+    'django.contrib.sessions',
+    'django.contrib.messages',
+    'django.contrib.staticfiles',
+    'bankdata',
+
+]
+
+
+
+
+Step-3 urls.py
+-------------------
+
+from django.conf.urls import include,url
+from django.contrib import admin
+from django.urls import path
+
+urlpatterns = [                 
+                url(r'^admin/',admin.site.urls),      
+                path('python/', include('bankdata.urls')),
+    
+]
+
+
+
+
+
+
+
+Step-4 bankdata/urls.py
+-----------------------------------------
+
+from django.conf.urls import include,url
+from .import views
+
+urlpatterns = [
+                
+                url(r'^fill$', views.index, name="index"), 
+                url(r'^logindata$', views.index, name="index"),
+                url(r'^filldata$', views.productdetail, name="productdetail"),
+                url(r'^checkdata/', views.alldata, name="alldata"),               
+              ]
+
+
+
+
+
+
+
+
+Step-5 bankdata/models
+--------------------------------------
+
+from django.db import models
+
+# Create your models here.
+
+class Python_Account_Holder(models.Model):
+    username = models.CharField(max_length=15)
+    password = models.CharField(max_length=20)
+
+    def __str__(self):
+        return self.username+' - '+self.password
+
+
+class WalletData(models.Model):
+      account_holder =models.ForeignKey(Python_Account_Holder, on_delete=models.CASCADE) 
+      name = models.CharField(max_length=15)
+      phone = models.CharField(max_length=15)
+      address = models.CharField(max_length=55)
+
+      def __str__(self):
+          return self.name+' -- '+self.phone+' -- '+self.address
+
+          
+
+
+  
+
+
+Step-6 bankdata/views.py
+----------------------------------------
+
+from django.shortcuts import render
+from django.template import loader
+from django.http import HttpResponse
+from bankdata.models import Python_Account_Holder,WalletData
+# Create your views here.
+account_id = 0
+def index(request):
+    if request.method == "POST":
+       uname = request.POST['uname']
+       print(uname)
+       paswd = request.POST['upass'] 
+       print(paswd)
+       icici_data = Python_Account_Holder.objects.all()
+       for icici in icici_data:
+           if icici.username == uname and icici.password == paswd:
+               print('Login Success')
+               global account_id
+               account_id = icici.pk
+               print('Primark Key is : ',account_id)
+               return  render(request,'bankdata/form.html')
+           else:
+               print('Login Failed..')    
+       
+    else:
+        return render(request,'bankdata/login.html')
+
+
+def productdetail(request):
+    if request.method == "POST":
+       uname = request.POST['uname']
+       print(uname)
+       uphone = request.POST['uphone'] 
+       print(uphone)
+       uadd = request.POST['uadd'] 
+       print(uadd)
+       walldata = WalletData()
+       walldata.account_holder =Python_Account_Holder.objects.get(pk=account_id)
+       walldata.name = uname
+       walldata.phone = uphone
+       walldata.address = uadd
+       walldata.save()
+       context={
+               'result':'Data Inserted Successfully',
+             }
+       return render(request,'bankdata/detail.html',context)
+    else:
+        html = "<strong><h1 style=color:red;font-size:30px;>EXCEPTION Hurrayyyyy...............</h1><strong>"
+        return HttpResponse(html)
+
+
+
+def alldata(request):
+    if request.method == "POST":
+         wdata = WalletData.objects.all()
+         context ={
+             'wdata':wdata,
+         }
+         return render(request,'bankdata/status.html',context)
+    else:
+         return HttpResponse('<h1>Data is not present</h1>')
+
+
+
+
+
+
+Step-7 bankdata/admin.py
+----------------------------------------
+
+from django.contrib import admin
+from .models import Python_Account_Holder,WalletData
+# Register your models here.
+
+admin.site.register(Python_Account_Holder)
+admin.site.register(WalletData)
+
+
+
+
+
+
+Step-8 templates/bankdata/login.html
+-----------------------------------------------------
+
+<html>
+    <head>
+        <style>
+               div{
+                  background-color: rgb(43, 214, 226);
+                  width:500px;
+				  margin-left:500px;
+              }
+        </style>
+    </head>
+    <body>
+          <h1 align ="center">Login Application</h1>
+          <br>
+          <div>
+              <br><br>
+              <form method="POST" action="logindata">
+                  {% csrf_token %}
+                  <pre>
+                Name     : <input type="text" name="uname" required placeholder="enter user name"/>
+                <br>
+                Password : <input type="password" name="upass" required placeholder="enter user Password"/>
+                <br>
+                           <input type="submit" value="Login"/>   
+                  </pre> 
+              </form>
+              Link <a href="checkdata/">All Data Link</a>
+          </div>
+    </body>
+</html>
+
+
+
+
+
+
+
+
+Step-9 templates/bankdata/form.html
+-------------------------------------------------
+
+<html>
+    <head>
+        <style>
+               div{
+                  background-color: rgb(226, 43, 217);
+                  width:500px;
+				  margin-left:500px;
+              }
+        </style>
+    </head>
+    <body>
+          <h1 align ="center">Login Application</h1>
+          <br>
+          <div>
+              <br><br>
+              <form method="POST" action="filldata">
+                  {% csrf_token %}
+                  <pre>
+                Name     : <input type="text" name="uname" required placeholder="enter user name"/>
+                <br>
+                Phone    : <input type="text" name="uphone" required placeholder="enter user phone"/>
+                <br>
+                Address  : <textarea cols="20" rows="10" name="uadd"></textarea>
+                <br>
+                           <input type="submit" value="Login"/>   
+                  </pre> 
+              </form>
+          </div>
+    </body>
+</html>
+
+
+
+
+
+
+
+
+
+Step-10 templates/bankdata/status.html
+--------------------------------------------------------
+
+
+<!DOCTYPE html>
+<html>
+<title></title>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style type="text/css">
+         div.head{
+              width: 100%;
+              height:200px;
+              background-color: lightgrey;
+              text-align: center;
+
+         }  
+         div.data{
+
+              width: 100%;
+              height:1200px;
+              background-color:powderblue; 
+         } 
+         div.result{
+            padding: 15px 20px;
+            margin: 20px;
+            background-color: pink;
+            width: 80%;
+            height: 80%
+         } 
+  </style>
+</head>
+<body>
+
+<div class="head">
+  <br><br>
+  <h1>Detail Page...</h1> 
+  <p>Employee Details.....!</p> 
+</div>
+<div class="data">
+  <div class="result">
+    <br><br>
+    <h2>Employeee....</h2>
+    {% if wdata %}
+    <ul>
+        {% for data in wdata %}
+      <li>
+          <strong>
+    <p>Name of Employee : {{data.name}}</p>
+    <br><br>
+    <p>Name of Employee : {{data.phone}}</p><br>
+    <p>Name of Employee : {{data.address}}</p><br></strong>
+     <br><br><br>
+    {% endfor %}  
+    {% else %}
+       <h2>Data is not present...</h2>
+    {% endif %}   
+  </li>
+    </ul>
+    
+  </div>
+</div>
+<br><br><br><br>
+</body>
+</html>
+
+
+
+
+
+
+
+Step-11 templates/bankdata/detail.html
+--------------------------------------------------------
+
+<!DOCTYPE html>
+<html>
+<style>
+input[type=submit] {
+  width: 100%;
+  background-color: #4CAF50;
+  color: white;
+  padding: 14px 20px;
+  margin: 8px 0;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+input[type=submit]:hover {
+  background-color: #45a049;
+}
+
+div {
+  border-radius: 5px;
+  background-color: #f2f2f2;
+  padding: 20px;
+  width:500px;
+  margin-left:auto;
+  margin-right: auto;
+}
+h3{
+    font-size: 25px;
+}
+</style>
+<body>
+    <h1 style="color:red;font-family:fantasy">
+        {{result}}      
+    </h1>
+<h3 style="text-align: center;">Form Page -1</h3>
+
+<div>
+    <form method="POST" action="/python/checkdata/">
+        {% csrf_token %}
+    <label>Click To See All Data</label>   
+  
+    <input type="submit" value="Submit">
+  </form>
+</div>
+      
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

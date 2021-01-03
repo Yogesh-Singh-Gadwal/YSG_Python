@@ -1,0 +1,174 @@
+Chapter - 11    Filtering Opeartion
+----------------------------------------------
+
+Step-1 in CMD
+--------------------
+
+==> type ( python manage.py shell )
+
+>>> from music.models import Album
+>>> Album.objects.all()
+<QuerySet [<Album: Arijit_Singh -- Love Aaj Kal>, <Album: Siddharth Sriram -- Emai Poyave>, <Album: Sonu Nigam -- Chanda Ke doli>, <Album: DSp -- Mirchi>]>
+>>> Album.objects.count()
+4 
+
+>>> Album.objects.filter(album_title__startswith='Em')
+<QuerySet [<Album: Siddharth Sriram -- Emai Poyave>]>
+>>> exit()
+
+
+
+
+
+
+
+Chapter 12 - Create super user 
+-------------------------------------------
+
+Step-1  open CMD
+-------------------------
+
+C:\Users\Mithun\Desktop\DjangoClass\website>python manage.py createsuperuser
+Username (leave blank to use 'mithun'): micky
+Email address: m@gmail.com
+Password: 
+Password (again): 
+Superuser created successfully.
+
+
+
+Step-2 music/admin.py
+--------------------------------
+from django.contrib import admin
+from .models import Album
+
+# Register your models here.
+admin.site.register(Album)
+
+
+
+Step-3 website/urls.py
+-----------------------------
+from django.conf.urls import include,url
+from django.contrib import admin
+
+urlpatterns = [
+                 url(r'^admin/',admin.site.urls),
+                 url(r'^data/',include('music.urls')),
+]
+
+
+
+
+Step-4 Go to Cmd
+------------------------
+
+==> python manage.py runserver
+
+==> http://127.0.0.1:8000/admin
+
+
+
+
+
+
+
+Chapter - 13    How to see Database records through views
+----------------------------------------------------------------------------------
+
+Step-1 music/views.py
+------------------------------
+from django.http import HttpResponse
+from .models import Album
+
+def index(request):
+    records = Album.objects.all()
+    for data in records:
+        print("Result : ",data)
+    return HttpResponse('<h1 style="color:red">Function-1 </h1>')
+
+
+def detail(request,data_id):
+    return HttpResponse('<br><br><h1 style="color:green">Function-2 Value is : '+str(data_id)+'</h1>')
+
+
+
+step-2 in cmd(Terminal)
+--------------------------------
+=> python manage.py runserver
+=> http://127.0.0.1:8000/data/
+
+==> see in terminal for all records
+
+
+
+
+
+Chapter 14 -> How to get data from views to browser(client)
+--------------------------------------------------------------------------------
+
+Step-1  music/views.py
+----------------------------------
+from django.http import HttpResponse
+from .models import Album
+
+def index(request):
+    records = Album.objects.all()
+    html =''
+    for data in records:
+        html += '<br><ul><li><h1>'+data.album_title+'</li><br></ul>'
+        print("Result : ",data)   
+    return HttpResponse(html)
+
+
+def detail(request,data_id):
+    return HttpResponse('<br><br><h1 style="color:green">Function-2 Value is : '+str(data_id)+'</h1>')
+
+
+step-2 in cmd(Terminal)
+--------------------------------
+=> python manage.py runserver
+=> http://127.0.0.1:8000/data/
+
+
+
+
+
+
+
+Chapter 15 -> Get data from views to browser(client) 
+-----------------------------------------------------------------------
+
+Step-1 music/views.py
+-------------------------------
+from django.http import HttpResponse
+from .models import Album
+
+def index(request):
+    records = Album.objects.all()
+    html =''
+    for data in records:
+        url = '/data/'+str(data.id)+'/'
+        html += '<br><ul><li><h1><a href="'+url+'">'+data.album_title+'</a></li><br></ul>'
+        print("Result : ",data)   
+    return HttpResponse(html)
+
+
+def detail(request,data_id):
+    return HttpResponse('<br><br><h1 style="color:green">You have selected Album : '+str(data_id)+'</h1>')
+
+
+step-2 in cmd(Terminal)
+--------------------------------
+=> python manage.py runserver
+=> http://127.0.0.1:8000/data/
+
+
+
+
+
+
+
+ 
+
+

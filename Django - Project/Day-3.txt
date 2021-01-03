@@ -1,0 +1,278 @@
+Chapter-6 Diff arguments executing diff function
+--------------------------------------------------------------
+
+Step-1 website/urls.py
+--------
+from django.conf.urls import include,url
+
+urlpatterns = [
+                 url(r'^data/',include('music.urls')),
+]
+
+
+
+
+Step-2 music/urls.py
+--------------------------
+from django.conf.urls import url
+from .import views
+
+urlpatterns = [
+
+          url(r'^$',views.index,name="index"),
+          url(r'^(?P<data_id>[0-9]+)/$',views.detail,name="detail"),
+          url(r'^(?P<data_id>[a-z]+)/$',views.detail2,name="detail2"),
+          url(r'^(?P<data_id>[0-9 a-z]+)/$',views.detail3,name="detail3"),
+          url(r'^(?P<data_id>[A-Z]+)/$',views.detail4,name="detail4"),
+]
+
+
+
+Step-3 music/views.py
+-------------------------------
+from django.http import HttpResponse
+
+def index(request):    
+    return HttpResponse('<h1 style="color:red">Function-1 </h1>')
+
+
+def detail(request,data_id):
+    return HttpResponse('<br><br><h1 style="color:green">Function-2 Value is : '+str(data_id)+'</h1>')
+
+def detail2(request,data_id):
+    return HttpResponse('<br><br><h1 style="color:orange">Funtion-3 Value is : '+str(data_id)+'</h1>')
+
+def detail3(request,data_id):
+    return HttpResponse('<br><br><h1 style="color:blue">Funtion-4 Value is : '+str(data_id)+'</h1>')
+
+def detail4(request,data_id):
+    return HttpResponse('<br><br><h1 style="color:powerblue">Funtion-5 Value is : '+str(data_id)+'</h1>')
+
+
+
+
+Step-4 run your application
+-----------------------------------
+==> python manage.py runserver
+
+==> http://127.0.0.1:8000/data/43545/
+==>http://127.0.0.1:8000/data/abc/
+==>http://127.0.0.1:8000/data/abc43545/ 
+==>http://127.0.0.1:8000/data/ABCDEF/
+
+
+
+
+
+
+
+
+
+
+
+Chapter 7 Diff arguments executing single function
+-------------------------------------------------------------------
+Step-1 website/urls.py
+--------
+from django.conf.urls import include,url
+
+urlpatterns = [
+                 url(r'^data/',include('music.urls')),
+]
+
+
+
+
+Step-2 music/urls.py
+--------------------------
+from django.conf.urls import url
+from .import views
+
+urlpatterns = [
+
+          url(r'^$',views.index,name="index"),
+          url(r'^(?P<data_id>[a-z 0-9 A-Z]+)/$',views.detail,name="detail"),
+
+]
+
+
+
+
+Step-3 music/views.py
+-------------------------------
+from django.http import HttpResponse
+
+def index(request):    
+    return HttpResponse('<h1 style="color:red">Function-1 </h1>')
+
+
+def detail(request,data_id):
+    return HttpResponse('<br><br><h1 style="color:green">Function-2 Value is : '+str(data_id)+'</h1>')
+
+
+
+
+Step-4 run your application
+-----------------------------------
+==> python manage.py runserver
+
+==> http://127.0.0.1:8000/data/43545/
+==>http://127.0.0.1:8000/data/abc/
+==>http://127.0.0.1:8000/data/abc43545/ 
+==>http://127.0.0.1:8000/data/ABCDEF/
+
+
+
+
+
+
+
+
+Chapter - 8    Data Base Operations
+-----------------------------------------------
+
+Step-1 music/models.py
+---------------------------------
+from django.db import models
+
+# Create your models here.
+class Album(models.Model):
+    album_title = models.CharField(max_length=50)
+    album_artist = models.CharField(max_length=50)
+    production_house = models.CharField(max_length=50)
+    album_logo = models.CharField(max_length=1150)
+
+    
+
+Step-2 settings.py
+------------------------
+INSTALLED_APPS = [
+    'django.contrib.admin',
+    'django.contrib.auth',
+    'django.contrib.contenttypes',
+    'django.contrib.sessions',
+    'django.contrib.messages',
+    'django.contrib.staticfiles',
+    'music'
+]
+
+
+
+Step-3 run commands 
+---------------------------------
+
+==> python manage.py makemigration music
+==> python manage.py migrate 
+
+
+
+
+
+
+Chapter - 9 Shell API 
+-------------------------------
+
+Step-1 music/models.py
+-------------------------------
+from django.db import models
+
+# Create your models here.
+class Album(models.Model):
+    album_title = models.CharField(max_length=50)
+    album_artist = models.CharField(max_length=50)
+    production_house = models.CharField(max_length=50)
+    album_logo = models.CharField(max_length=1150)
+
+    
+
+
+Step-2 Shell API
+---------------------------
+cmd=> python manage.py shell
+
+>>> from music.models import Album
+>>> a1 = Album(album_title="Love Aaj Kal",album_artist="Arijit_Singh",production_house="T-Series",album_logo="http://")
+>>> a1.save()
+>>> a1.album_artist
+'Arijit_Singh'
+>>> a1.album_title 
+'Love Aaj Kal'
+
+>>> b1 = Album()
+>>> b1.album_title="Emai Poyave"
+>>> b1.album_artist="Siddharth Sriram"
+>>> b1.production_house="T-series"
+>>> b1.album_logo="http://"
+>>> b1.save()
+
+>>> a1.album_artist
+'Arijit_Singh'
+>>> b1.album_artist 
+'Siddharth Sriram' 
+
+>>> c1 = Album()
+>>> c1.album_title="Chanda Ke doli"
+>>> c1.album_artist="Sonu Nigam"
+>>> c1.production_house="T-Series"
+>>> c1.album_logo="http://"
+>>> c1.save()
+
+>>> d1 = Album()
+>>> d1.album_title = "Mirchi"
+>>> d1.album_artist="DSp"
+>>> d1.production_house="Promod Uppalapati"
+>>> d1.album_logo="http://"
+>>> d1.save()
+
+>>> Album.objects.all()
+<QuerySet [<Album: Album object (1)>, <Album: Album object (2)>, <Album: Album object (3)>, <Album: Album object (4)>]>
+>>>
+>>> exit()
+
+
+
+
+
+
+
+
+
+Chapter - 10 Reteriving Object Data  
+-----------------------------------------------
+
+Step-1 music/models.py
+------------------------------
+from django.db import models
+
+# Create your models here.
+class Album(models.Model):
+    album_title = models.CharField(max_length=50)
+    album_artist = models.CharField(max_length=50)
+    production_house = models.CharField(max_length=50)
+    album_logo = models.CharField(max_length=1150)
+
+    def __str__(self):
+        return self.album_artist+' -- '+self.album_title
+
+
+
+Step-2 Shell API
+---------------------------
+cmd=> python manage.py shell
+
+>>> from music.models import Album
+>>> Album.objects.all()
+<QuerySet [<Album: Arijit_Singh -- Love Aaj Kal>, <Album: Siddharth Sriram -- Emai Poyave>, <Album: Sonu Nigam -- Chanda Ke doli>, <Album: DSp -- Mirchi>]>
+
+>>> exit()
+
+
+
+
+
+
+
+
+
+
+

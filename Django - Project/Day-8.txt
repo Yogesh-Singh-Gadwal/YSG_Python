@@ -1,0 +1,451 @@
+Chapter - 29   Reducing Code by Giving Default Error
+--------------------------------------------------------------------------
+
+Step-1 music/views.py
+-----------------------------
+from django.http import HttpResponse
+from .models import Album
+#from django.template import loader
+from django.shortcuts import render
+from django.http import Http404
+from .models import Song
+from django.shortcuts import get_object_or_404
+
+
+def index(request):
+    records = Album.objects.all() 
+    return render(request,'music/index.html',{'records':records})
+
+
+def detail(request,data_id):
+    records = Album.objects.all()
+    single_record = get_object_or_404(Album,pk=data_id)
+    data2 = single_record.song_set.all()
+    return render(request,'music/detail.html',{'single_record':single_record,'data2':data2,'records':records})
+
+ 
+
+
+Step-2 go to cmd(Terminal)
+-----------------------------------
+
+==> python manage.py runserver
+==> http://127.0.0.1:8000/data
+==> http://127.0.0.1:8000/data/1
+==> http://127.0.0.1:8000/data/34
+
+
+
+
+
+
+
+Chapter - 30  How to Pass Data from template to View
+----------------------------------------------------------------------
+
+Step-1 create new app 
+-------------------------------
+python manage.py startapp sturegister
+
+
+
+Step-2 settings.py 
+-----------------------
+# Application definition
+
+INSTALLED_APPS = [
+    'django.contrib.admin',
+    'django.contrib.auth',
+    'django.contrib.contenttypes',
+    'django.contrib.sessions',
+    'django.contrib.messages',
+    'django.contrib.staticfiles',
+    'music',
+    'sturegister'
+]
+
+
+Step-3 add urls.py in sturegister app
+
+
+Step-4 sturegister/urls.py
+------------------------------------
+from django.conf.urls import url
+from .import views
+
+app_name ='music'
+urlpatterns = [
+          
+          url(r'^$',views.dataIn,name="dataIn"),
+          url(r'^savedata$',views.dataIn,name="dataIn"),
+          url(r'^(?P<data_id>[a-z 0-9 A-Z]+)/$',views.dataOut,name="dataOut"),
+
+]
+
+
+
+
+Step-5 sturegister/formpage.html
+-------------------------------------------
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+body {font-family: Arial, Helvetica, sans-serif;}
+* {box-sizing: border-box;}
+
+input[type=text], select, textarea {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+  margin-top: 6px;
+  margin-bottom: 16px;
+  resize: vertical;
+}
+
+input[type=submit] {
+  background-color: #4CAF50;
+  color: white;
+  padding: 12px 20px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+input[type=submit]:hover {
+  background-color: #45a049;
+}
+
+.container {
+  border-radius: 5px;
+  background-color: #f2f2f2;
+  padding: 20px;
+}
+div#one{
+    width: 700px;
+    margin-left: auto;
+    margin-right: auto;
+}
+</style>
+</head>
+<body>
+
+<h1 align="center">Student Registeration</h1>
+<div id="one">
+    <div class="container">
+    <form method="POST" action="savedata">
+        {% csrf_token %}
+        <label for="fname">First Name</label>
+        <input type="text" id="fname" name="firstname" placeholder="Your name..">
+
+        <label for="lname">Last Name</label>
+        <input type="text" id="lname" name="lastname" placeholder="Your last name..">
+
+        <label for="country">Country</label>
+        <select id="country" name="country">
+        <option value="australia">Australia</option>
+        <option value="canada">Canada</option>
+        <option value="usa">USA</option>
+        </select>
+
+        <label for="subject">Subject</label>
+        <textarea id="subject" name="subject" placeholder="Write something.." style="height:200px"></textarea>
+
+        <input type="submit" value="Submit">
+    </form>
+    </div>
+</div>
+</body>
+</html>
+
+
+
+
+Step-6 sturegister/views.py
+-----------------------------------
+from django.shortcuts import render
+
+# Create your views here.
+
+def dataIn(request):
+    if request.method == 'POST':
+        firstName = request.POST['firstname']
+        lastName = request.POST['lastname']
+        country = request.POST['country']
+        subject = request.POST['subject']
+        print()
+        print("=="*40)
+        print()
+        print("First Name : ",firstName)
+        print()
+        print("Last Name : ",lastName)
+        print()
+        print("Country : ",country)
+        print()
+        print("Subject : ",subject)
+        print()
+        print("=="*40)
+        print()
+    else:
+        return render(request,'sturegister/formpage.html')
+
+def dataOut(request):
+    pass
+
+
+
+
+Step-7 go to cmd(Terminal)
+-----------------------------------
+
+==> python manage.py runserver
+==> http://127.0.0.1:8000/stu
+       Enter your data and submit 
+       and then check in terminal for result 
+
+
+
+
+
+
+Chapter - 31  Display Form Data
+------------------------------------------
+
+
+Step-1 sturegister/views.py
+------------------------------------
+
+from django.shortcuts import render
+
+# Create your views here.
+
+def dataIn(request):
+    if request.method == 'POST':
+        firstName = request.POST['firstname']
+        lastName = request.POST['lastname']
+        country = request.POST['country']
+        subject = request.POST['subject']
+        print()
+        print("=="*40)
+        print()
+        print("First Name : ",firstName)
+        print()
+        print("Last Name : ",lastName)
+        print()
+        print("Country : ",country)
+        print()
+        print("Subject : ",subject)
+        print()
+        print("=="*40)
+        print()
+                       
+        return render(request,'sturegister/display.html',{
+                   'firstName':firstName,
+                   'lastName':lastName,
+                   'country':country,
+                   'subject':subject
+                   })           
+    else:
+        return render(request,'sturegister/formpage.html')
+
+def dataOut(request):
+    pass
+
+
+
+
+
+Step-2 sturegister/display.html
+---------------------------------------
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+* {
+  box-sizing: border-box;
+}
+.menu {
+  float:left;
+  width:20%;
+  text-align:center;
+}
+.menu a {
+  background-color:#e5e5e5;
+  padding:8px;
+  margin-top:7px;
+  display:block;
+  width:100%;
+  color:black;
+}
+.main {
+  float:left;
+  width:60%;
+  padding:0 20px;
+}
+.right {
+  background-color:#e5e5e5;
+  float:left;
+  width:20%;
+  padding:15px;
+  margin-top:7px;
+  text-align:center;
+}
+
+@media only screen and (max-width:620px) {
+  /* For mobile phones: */
+  .menu, .main, .right {
+    width:100%;
+  }
+}
+</style>
+</head>
+<body style="font-family:Verdana;color:#aaaaaa;">
+
+<div style="background-color:#e5e5e5;padding:15px;text-align:center;">
+  <h1>Hello World</h1>
+</div>
+
+<div style="overflow:auto">
+  <div class="menu">
+    <a href="#">Link 1</a>
+    <a href="#">Link 2</a>
+    <a href="#">Link 3</a>
+    <a href="#">Link 4</a>
+  </div>
+
+  <div class="main">
+    <h2>Student Data </h2>
+               <h2>First Name : {{firstName}}</h2>
+               <h2>Last Name : {{lastName}}</h2>
+               <h2>Country : {{country}}</h2>
+               <h2>Subject : {{subject}}</h2>
+
+  </div>
+
+  <div class="right">
+    <h2>About</h2>
+    <p>Lorem ipsum dolor sit amet, consectetuer adipiscing elit.</p>
+  </div>
+</div>
+
+<div style="background-color:#e5e5e5;text-align:center;padding:10px;margin-top:7px;">Plz Use your Own Created Template</div>
+
+</body>
+</html>
+
+
+
+
+Step-3 go to cmd(Terminal)
+-----------------------------------
+
+==> python manage.py runserver
+==> http://127.0.0.1:8000/stu
+       Enter your data and submit 
+       and then check in terminal for result 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,194 @@
+Chapter - 34  Form-Template
+--------------------------------------
+
+Step-1 create new app 
+-------------------------------
+==> python manage.py startapp myform
+
+
+Step-2 settings.py
+------------------------
+
+==> # Application definition
+
+INSTALLED_APPS = [
+    'django.contrib.admin',
+    'django.contrib.auth',
+    'django.contrib.contenttypes',
+    'django.contrib.sessions',
+    'django.contrib.messages',
+    'django.contrib.staticfiles',
+    'myform',
+
+]
+
+
+
+
+Step-3 urls.py
+-------------------
+
+from django.conf.urls import include,url
+from django.contrib import admin
+from django.urls import path
+
+urlpatterns = [                 
+                url(r'^admin/',admin.site.urls),      
+                path('mydata/', include('myform.urls')),
+    
+]
+
+
+
+
+
+Step-4 myform/urls.py
+-----------------------------
+
+from django.urls import path
+from myform import views as myview
+
+
+urlpatterns = [
+
+    path('data/', myview.mydataform),
+    path('data/thankyou/', myview.mydataform),  
+]
+
+
+
+
+Step-5 myform/forms.py
+-------------------------------
+==> create new file name forms.py inside myform app
+
+
+from django import forms
+
+class MyForm(forms.Form):
+ name = forms.CharField(label='Enter your name', max_length=100)
+ email = forms.EmailField(label='Enter your email', max_length=100)
+ feedback = forms.CharField(widget=forms.Textarea(attrs={'width':"100%", 'cols' : "80", 'rows': "20", }))
+
+
+
+
+
+Step-6 myform/views.py
+--------------------------------
+
+from django.shortcuts import render
+from myform.forms import MyForm
+from django.template import loader
+from django.http import HttpResponse
+# Create your views here.
+
+
+def mydataform(request): 
+    if request.method == 'POST':        
+        myForm = MyForm(request.POST)
+        if myForm.is_valid():
+            name = myForm.cleaned_data['name']
+            email = myForm.cleaned_data['email']
+            feedback = myForm.cleaned_data['feedback']
+            context = {
+            'name': name,
+            'email': email,
+            'feedback': feedback
+            }
+            template = loader.get_template('detail.html')            
+            return HttpResponse(template.render(context, request))
+    else:
+         form = MyForm()
+         return render(request, 'mydata.html', {'form':form})
+
+    
+
+
+
+
+
+Step-7 templates/mydata.html
+----------------------------------------
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Django Forms Tutorial</title>
+</head>
+<body>
+<h2>Disney World</h2>
+
+<form action="thankyou/" method="post">
+    {% csrf_token %}
+    <table>
+           {{form.as_table}}
+
+     </table>
+<input type="submit" value="Submit" />
+</form>
+</body>
+</html>
+
+
+
+
+
+Step-8 templates/detail.html
+----------------------------------------
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Detail Data</title>
+</head>
+<body>
+<h2>Response Entered by you:</h2>
+<form method="post">
+
+            <ul>
+            <li>Name: <strong>{{ name }}</strong></li>
+
+            <li>Email: <strong>{{ email }}</strong></li>
+
+            <li>Feedback: <strong>{{ feedback }}</strong></li>
+          </ul>
+</form>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

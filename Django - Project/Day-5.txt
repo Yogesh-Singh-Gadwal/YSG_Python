@@ -1,0 +1,205 @@
+
+Chapter - 16 -> to know selected list data 
+--------------------------------------------------------
+
+
+Step-1 music/views.py
+----------------------------  
+
+from django.http import HttpResponse
+from .models import Album
+
+def index(request):
+    records = Album.objects.all()
+    html =''
+    for data in records:
+        url = '/data/'+str(data.id)+'/'
+        html += '<br><ul><li><h1><a href="'+url+'">'+data.album_title+'</a></li><br></ul>'
+        print("Result : ",data)   
+    return HttpResponse(html)
+
+
+def detail(request,data_id):
+    single_record = Album.objects.get(pk=data_id)
+    print(single_record)
+    return HttpResponse('''<br><br><h1 style="color:green">You have selected Album-ID : '''+str(data_id)+'''<br><br>
+    You have selected Album Name is :'''+str(single_record)+'''</h1>''')
+
+
+
+
+Step-2  Go to Cmd(Terminal) 
+------------------------------------
+
+==> python manage.py runserver
+
+==> http://127.0.0.1:8000/data/
+
+
+
+
+
+
+
+Chapter - 17  -> Complete application(Db-Model-Views-Template (merger -Backend data with front end) - views
+------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+Step-1  create folder structure 
+------------------------------------------
++music 
+    + templates
+            + music 
+                     - index.html
+
+
+
+Step-2  music/index.html
+----------------------------------
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+           body{
+                 margin: 0px;
+           }
+           header{
+                  background-color: black;
+                  color: white;
+                  width: 100%;
+                  height: 120px;
+                  padding: 30px;
+           } 
+           nav{
+               background-color: yellowgreen;
+               width: 100%;
+               height: 50px;
+               padding: 30px;
+           }
+           section{
+                 width: 100%;
+                 height: 550px;
+                 background-color: skyblue;
+                 padding: 30px;
+           }
+           article{
+                 width: 350px;
+                 height: 450px; 
+                 background-color: lightsalmon;
+                 padding: 20px;
+                 margin: 15px;
+                 border-radius: 15px;
+           }
+           footer{
+                  background-color: black;
+                  color: white;
+                  width: 100%;
+                  height: 50px;
+                  padding: 30px;
+           }
+           a{
+             text-decoration:none;
+           }
+    </style>
+</head>
+<body>
+        
+      <header></header>
+      <nav></nav>
+      <section>
+               <article>
+                     <h1>Album Names:</h1>
+                     {% if records %}
+                         <ul>
+                            {% for data in records %}
+                               <li>
+                                   <a href="/data/{{data.id}}">{{data.album_title}}</a>
+                                </li>
+                            {% endfor %}
+                         </ul>
+                     {% else %}
+                     <h2>Data is not present</h2>
+                     {% endif %}
+                        
+               </article>
+      </section>
+      <footer></footer>
+</body>
+</html>
+
+
+
+
+
+Step-3 music/views.py
+-------------------------------
+
+from django.http import HttpResponse
+from .models import Album
+from django.template import loader
+
+def index(request):
+    records = Album.objects.all() 
+    context = {
+            "records":records,
+    }
+    template = loader.get_template('music/index.html')
+    return HttpResponse(template.render(context,request))
+
+
+def detail(request,data_id):
+    single_record = Album.objects.get(pk=data_id)
+    print(single_record)
+    return HttpResponse('''<br><br><h1 style="color:green">You have selected Album-ID : '''+str(data_id)+'''<br><br>
+    You have selected Album Name is :'''+str(single_record)+'''</h1>''')
+
+
+
+
+Step-4  Go to Cmd(Terminal) 
+------------------------------------
+
+==> python manage.py runserver
+
+==> http://127.0.0.1:8000/data/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

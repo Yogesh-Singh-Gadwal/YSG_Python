@@ -1,0 +1,351 @@
+Chapter - 24  Removing HardCoded URl to Dynamic Type
+-----------------------------------------------------------------------------
+
+Step-1 music/index.html
+--------------------------------
+
+      <section>
+               <article>
+                     <h1>Album Names:</h1>
+                     {% if records %}
+                         <ul>
+                            {% for data in records %}
+                               <li>                                   
+                                   <a href="{% url 'detail' data.id %}">{{data.album_title}}</a>
+                                </li>
+                            {% endfor %}
+                         </ul>
+                     {% else %}
+                     <h2>Data is not present</h2>
+                     {% endif %}
+                        
+               </article>
+      </section>
+
+
+
+Step-2 Go to CMD(Terminal)
+--------------------------------------
+
+==>http://127.0.0.1:8000/data
+
+
+
+
+
+
+Chapter - 25  Name URL pattern
+--------------------------------------------
+
+Step-1 music/urls.py
+---------------------------------
+from django.conf.urls import url
+from .import views
+
+
+app_name ='music'
+urlpatterns = [
+          
+          url(r'^$',views.index,name="index"),
+          url(r'^(?P<data_id>[a-z 0-9 A-Z]+)/$',views.detail,name="detail"),
+
+]
+
+
+
+Step-2 music/index.html
+---------------------------------
+      <section>
+               <article>
+                     <h1>Album Names:</h1>
+                     {% if records %}
+                         <ul>
+                            {% for data in records %}
+                               <li>                                   
+                                   <a href="{% url 'music:detail' data.id %}">{{data.album_title}}</a>
+                                </li>
+                            {% endfor %}
+                         </ul>
+                     {% else %}
+                     <h2>Data is not present</h2>
+                     {% endif %}
+                        
+               </article>
+      </section>
+
+
+
+Step-3 Go to CMD(Terminal)
+--------------------------------------
+
+==>http://127.0.0.1:8000/data
+
+
+
+
+
+
+Chapter - 26  Getting Song Records to Views Part
+------------------------------------------------------------------
+
+Step-1 music/views.py
+-----------------------------
+from django.http import HttpResponse
+from .models import Album
+#from django.template import loader
+from django.shortcuts import render
+from django.http import Http404
+from .models import Song
+
+def index(request):
+    records = Album.objects.all() 
+    return render(request,'music/index.html',{'records':records})
+
+
+def detail(request,data_id):
+    try:
+       single_record = Album.objects.get(pk=data_id)
+       data2 = single_record.song_set.all()
+       for rec in data2:
+           print(rec)
+    except Album.DoesNotExist:
+       return HttpResponse('<br><br><h1 style="color:red">Soon this album will be added</h1>')
+
+
+
+
+Step-3 Go to CMD(Terminal)
+--------------------------------------
+
+==>http://127.0.0.1:8000/data
+==> Click on song and Check terminal 
+
+
+
+
+
+
+
+
+Chapter - 27  Adding Songs to Album Records
+--------------------------------------------------------------
+
+Step-1 music/views.py
+-----------------------------
+from django.http import HttpResponse
+from .models import Album
+#from django.template import loader
+from django.shortcuts import render
+from django.http import Http404
+from .models import Song
+
+def index(request):
+    records = Album.objects.all() 
+    return render(request,'music/index.html',{'records':records})
+
+
+def detail(request,data_id):
+    try:
+       single_record = Album.objects.get(pk=data_id)
+       data2 = single_record.song_set.all()
+       return render(request,'music/detail.html',{'single_record':single_record,'data2':data2})
+    except Album.DoesNotExist:
+       return HttpResponse('<br><br><h1 style="color:red">Soon this album will be added</h1>')
+
+
+
+
+==>create detail.html in templates/music folder
+Step-2 music/detail.html
+--------------------------------
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    
+    <h1>Album Artist : {{single_record.album_artist}}</h1>
+    <h2>Songs-List</h2>
+    <ol>
+        {% if data2 %}
+            {% for rec in data2 %}
+                  <li>
+                      <h2>{{rec.song_title}} --- {{rec.song_type}}</h2>
+                  </li>
+            {% endfor %}
+        {% else %}
+             <h2>Songs are not available...</h2>
+        {% endif %}
+    </ol>
+
+</body>
+</html>
+
+
+Step-3 Go to CMD(Terminal)
+--------------------------------------
+
+==>http://127.0.0.1:8000/data
+
+
+
+
+
+
+
+
+
+Chapter - 28  Displaying Album with Song Records
+-------------------------------------------------------------------
+
+Step-1 music/views.py
+-----------------------------
+from django.http import HttpResponse
+from .models import Album
+#from django.template import loader
+from django.shortcuts import render
+from django.http import Http404
+from .models import Song
+
+def index(request):
+    records = Album.objects.all() 
+    return render(request,'music/index.html',{'records':records})
+
+
+def detail(request,data_id):
+    try:
+       records = Album.objects.all() 
+       single_record = Album.objects.get(pk=data_id)
+       data2 = single_record.song_set.all()
+       return render(request,'music/detail.html',{'single_record':single_record,'data2':data2,'records':records})
+    except Album.DoesNotExist:
+       return HttpResponse('<br><br><h1 style="color:red">Soon this album will be added</h1>')
+
+
+
+
+
+Step-2 music/detail.html
+--------------------------------
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+           body{
+                 margin: 0px;
+           }
+           header{
+                  background-color: black;
+                  color: white;
+                  width: 100%;
+                  height: 120px;
+                  padding: 30px;
+           } 
+           nav{
+               background-color: yellowgreen;
+               width: 100%;
+               height: 50px;
+               padding: 30px;
+           }
+           section{
+                 width: 100%;
+                 height: 550px;
+                 background-color: skyblue;
+                 padding: 30px;
+           }
+           article{
+                 width: 350px;
+                 height: 450px; 
+                 background-color: lightsalmon;
+                 padding: 20px;
+                 margin: 15px;
+                 border-radius: 15px;
+                 float: left;
+           }
+           footer{
+                  background-color: black;
+                  color: white;
+                  width: 100%;
+                  height: 50px;
+                  padding: 30px;
+           }
+           a{
+             text-decoration:none;
+           }
+           article#one{
+               background-color: palevioletred;
+           }
+    </style>
+</head>
+<body>
+        
+      <header></header>
+      <nav></nav>
+      <section>
+               <article>
+                     <h1>Album Names:</h1>
+                     {% if records %}
+                         <ul>
+                            {% for data in records %}
+                               <li>                                   
+                                   <a href="{% url 'music:detail' data.id %}">{{data.album_title}}</a>
+                                </li>
+                            {% endfor %}
+                         </ul>
+                     {% else %}
+                     <h2>Data is not present</h2>
+                     {% endif %}
+                        
+               </article>
+               <article id="one">
+                <h2>Album Artist : {{single_record.album_artist}}</h2>
+                <h3>Album Name : {{single_record.album_title}}</h3>
+                <h3>Songs-List</h3>
+                <ol>
+                    {% if data2 %}
+                        {% for rec in data2 %}
+                              <li>
+                                  {{rec.song_title}} --- {{rec.song_type}}
+                              </li>
+                        {% endfor %}
+                    {% else %}
+                         <h2>Songs are not available...</h2>
+                    {% endif %}
+                </ol>
+               </article>
+      </section>
+      <footer></footer>
+</body>
+</html>
+
+
+
+
+Step-3 Go to CMD(Terminal)
+--------------------------------------
+
+==>http://127.0.0.1:8000/data
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

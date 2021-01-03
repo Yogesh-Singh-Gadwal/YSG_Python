@@ -1,0 +1,47 @@
+
+Date : 1-Dec-2020
+
+
+
+Chapter-1 -> Installation
+
+Step-1
+----------
+Install django 
+
+=> pip install django
+
+
+
+
+
+Chapter-2 -> First Project
+
+Step-1 
+----------
+=> create one folder on desktop (give name as djangoclass)
+then in cmd type 
+
+=> cd desktop 
+=> cd djangoclass
+
+=>C:\Users\urname\Desktop\DjangoClass> django-admin startproject website
+
+
+
+Step-2
+---------
+ Run dummy project and check is it working or not 
+
+=> cd website 
+=> C:\Users\urname\Desktop\DjangoClass\website> python manage.py runserver
+
+open browser and type
+
+=> http://127.0.0.1:8000/
+
+
+
+
+
+

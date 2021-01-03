@@ -1,0 +1,385 @@
+Chapter - 35  Form-Template
+--------------------------------------
+
+Step-1 create new app 
+-------------------------------
+==> python manage.py startapp formdatabase
+
+
+Step-2 settings.py
+------------------------
+
+==> # Application definition
+
+INSTALLED_APPS = [
+    'django.contrib.admin',
+    'django.contrib.auth',
+    'django.contrib.contenttypes',
+    'django.contrib.sessions',
+    'django.contrib.messages',
+    'django.contrib.staticfiles',
+   'formdatabase',
+
+]
+
+
+
+
+Step-3 urls.py
+-------------------
+
+from django.conf.urls import include,url
+from django.contrib import admin
+from django.urls import path
+
+urlpatterns = [                 
+                url(r'^admin/',admin.site.urls),      
+                path('mickydata/', include('formdatabase.urls')),
+    
+]
+
+
+
+
+
+
+
+Step-4 formdatabase/urls.py
+-----------------------------------------
+from django.conf.urls import url
+from .import views
+
+urlpatterns =[
+
+    url(r'fill/', views.formstatus, name="formstatus"),
+    url(r'fill/savedata/', views.formstatus, name="formstatus"),
+    url(r'viewdata/', views.madhudata, name="madhudata"),
+]
+
+
+
+
+
+Step-5 formdatabase/models
+--------------------------------------
+
+from django.db import models
+
+# Create your models here.
+
+class MickyStore(models.Model):
+    firstname = models.CharField(max_length=10)
+    lastname = models.CharField(max_length=15)
+    email = models.CharField(max_length=25)
+    phone = models.CharField(max_length=10)
+    country = models.CharField(max_length=10)
+
+    def __str__(self):
+        return self.firstname + ' ---  '+ self.lastname+ ' ---  '+ self.email+ ' ---  '+ self.phone+ ' ---  '+ self.country
+
+
+
+  
+
+
+Step-6 formdatabase/views.py
+----------------------------------------
+
+from django.shortcuts import render
+from django.http import HttpResponse
+from .models import MickyStore
+from django.template import loader
+
+# Create your views here.
+def formstatus(request):
+    if request.method == 'POST':
+        fname = request.POST['uname']
+        print(fname)
+        lname = request.POST['lname']
+        myemail = request.POST['email']
+        myphone = request.POST['phone']
+        mycountry = request.POST['country']
+        
+        micky = MickyStore()
+        micky.firstname = fname
+        micky.lastname = lname
+        micky.email = myemail
+        micky.phone = myphone
+        micky.country = mycountry
+        micky.save()       
+        context={
+            'fname':fname,
+        }   
+        return render(request,'formdatabase/mydata.html',context)      
+    else:
+        return render(request,'formdatabase/index.html')
+
+
+def madhudata(request):
+    mdata = MickyStore.objects.all()
+    print(mdata)
+    for x in mdata:
+        print('--'*30);print()
+        print(x)
+        print('--'*30);print()
+    context = {
+        'mdata':mdata,
+    }
+    return render(request,'formdatabase/detail.html',context)
+
+
+
+
+
+
+
+
+Step-7 templates/formdatabase/index.html
+--------------------------------------------------------
+
+<!DOCTYPE html>
+<html>
+<style>
+input[type=text], select {
+  width: 100%;
+  padding: 12px 20px;
+  margin: 8px 0;
+  display: inline-block;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+
+input[type=submit] {
+  width: 100%;
+  background-color: #4CAF50;
+  color: white;
+  padding: 14px 20px;
+  margin: 8px 0;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+input[type=submit]:hover {
+  background-color: #45a049;
+}
+
+div {
+  border-radius: 5px;
+  background-color: #f2f2f2;
+  padding: 20px;
+  width:500px;
+  margin-left:auto;
+  margin-right: auto;
+}
+h3{
+    font-size: 25px;
+}
+</style>
+<body>
+
+<h3 style="text-align: center;">Form Page -1</h3>
+
+<div>
+    <form method="POST" action="savedata/">
+        {% csrf_token %}
+    <label for="fname">First Name</label>
+    <input type="text"  name="uname" placeholder="Your name..">
+
+    <label for="lname">Last Name</label>
+    <input type="text"  name="lname" placeholder="Your last name..">
+
+    <label for="fname">Email</label>
+    <input type="text"  name="email" placeholder="Your name email">
+
+    <label for="lname">Phone</label>
+    <input type="text"  name="phone" placeholder="Your phone">
+
+    <label for="country">Country</label>
+    <select  name="country">
+      <option value="australia">Australia</option>
+      <option value="canada">Canada</option>
+      <option value="usa">USA</option>
+      <option value="usa">India</option>
+    </select>
+  
+    <input type="submit" value="Submit">
+  </form>
+</div>
+      
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+Step-8 templates/formdatabase/mydata.html
+------------------------------------------------------------
+
+<!DOCTYPE html>
+<html>
+<style>
+input[type=text], select {
+  width: 100%;
+  padding: 12px 20px;
+  margin: 8px 0;
+  display: inline-block;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+
+input[type=submit] {
+  width: 100%;
+  background-color: #4CAF50;
+  color: white;
+  padding: 14px 20px;
+  margin: 8px 0;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+input[type=submit]:hover {
+  background-color: #45a049;
+}
+
+div {
+  border-radius: 5px;
+  background-color: #f2f2f2;
+  padding: 20px;
+  width:500px;
+  margin-left:auto;
+  margin-right: auto;
+}
+h3{
+    font-size: 25px;
+}
+</style>
+<body>
+
+<h3 style="text-align: center;">Form Page -1</h3>
+
+<div>
+    <form method="POST" action="/mickydata/viewdata/">
+        {% csrf_token %}
+    <label>Data is Inserted</label>
+    <strong>{{fname}}</strong>
+  
+    <input type="submit" value="Submit">
+  </form>
+</div>
+      
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+Step-9 templates/formdatabase/detail.html
+---------------------------------------------------------
+
+
+<!DOCTYPE html>
+<html>
+<title></title>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style type="text/css">
+         div.head{
+              width: 100%;
+              height:200px;
+              background-color: lightgrey;
+              text-align: center;
+
+         }  
+         div.data{
+
+              width: 100%;
+              height:auto;
+              background-color:powderblue; 
+         } 
+         div.result{
+            padding: 15px 20px;
+            margin: 20px;
+            background-color: pink;
+            width: 80%;
+            height: 80%
+         } 
+  </style>
+</head>
+<body>
+
+<div class="head">
+  <br><br>
+  <h1>Detail Page...</h1> 
+  <p>Employee Details.....!</p> 
+</div>
+<div class="data">
+  <div class="result">
+    <br><br>
+    <h2>Employeee....</h2>
+    {% if mdata %}
+    <ul>
+        {% for data in mdata %}
+      <li>
+    <p>Name of Employee : {{data.firstname}}</p>
+    <br><br>
+    <p>Name of Employee : {{data.lastname}}</p><br>
+    <p>Name of Employee : {{data.email}}</p><br>
+    <p>Name of Employee : {{data.phone}}</p><br>
+    <p>Name of Employee : {{data.country}}</p><br><br><br><br>
+    {% endfor %}  
+    {% else %}
+       <h2>Data is not present...</h2>
+    {% endif %}   
+  </li>
+    </ul>
+    
+  </div>
+</div>
+<br><br><br><br>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

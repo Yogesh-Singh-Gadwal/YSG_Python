@@ -1,0 +1,247 @@
+Chapter-3   First Application with Browser
+--------------
+
+
+Step-1 creating app - music
+-------------------------------------
+
+=> python manage.py startapp music 
+
+=> website
+                 +music
+                             - __init__.py
+                             -  models.py
+                             -  admin.py
+                             -  app.py
+                             -  views.py
+                             -  test.py
+                             -  urls.py   =>  we have to create this file
+     
+                 +website
+                            - __init__.py
+                            - settings.py
+                            - wsgi.py
+                            - asgi.py  
+                 +manage.py 
+
+
+Step-2  settings.py
+------------------------
+
+# Application definition
+
+INSTALLED_APPS = [
+    'django.contrib.admin',
+    'django.contrib.auth',
+    'django.contrib.contenttypes',
+    'django.contrib.sessions',
+    'django.contrib.messages',
+    'django.contrib.staticfiles',
+    'music'
+]
+
+
+
+Step-3  website/urls.py
+------------------------------
+
+from django.conf.urls import include,url
+
+urlpatterns = [
+                 url(r'^data/',include('music.urls')),
+]
+
+
+
+
+Step-4 music/urls.py
+------------------------------
+from django.conf.urls import url
+from .import views
+
+urlpatterns = [
+
+          url(r'^$',views.index,name="index"),
+]
+
+
+
+Step-5  music/views.py
+-------------------------------
+from django.http import HttpResponse
+
+def index(request):
+    return HttpResponse('<h1 style="color:red">Hi, this is My first Application......</h1>')
+
+
+
+Step-6  -> runserver
+---------------------------
+
+=> python manage.py runserver
+
+go to browser type => http://127.0.0.1:8000/data/
+
+ to stop server => ctrl + c
+
+
+
+
+
+
+Chapter -4     -> Multiple Request
+----------------
+
+Step-1  website/urls.py
+------------------------------
+
+from django.conf.urls import include,url
+
+urlpatterns = [
+                 url(r'^data/',include('music.urls')),
+]
+
+
+Step-2 music/urls.py
+------------------------------
+from django.conf.urls import url
+from .import views
+
+urlpatterns = [
+
+          url(r'^f1/$',views.index,name="index"),
+          url(r'^f2/$',views.index2,name="index2"),
+          url(r'^f3/$',views.index3,name="index3"),
+          url(r'^f4/$',views.index4,name="index4"),
+]
+
+
+
+Step-3 music/views.py
+------------------------------
+from django.http import HttpResponse
+
+def index(request):
+    return HttpResponse('<h1 style="color:red">Hi, this is My First Function......</h1>')
+
+def index2(request):
+    return HttpResponse('<h1 style="color:green">Hi, this is My Sec Function......</h1>')
+
+def index3(request):
+    return HttpResponse('<h1 style="color:blue">Hi, this is My Third Function......</h1>')
+
+def index4(request):
+    return HttpResponse('<h1 style="color:orange">Hi, this is My Fourth Function......</h1>')        
+
+
+
+Step-4  Runserver
+--------------------------
+
+==> python manage.py runserver 
+
+type in browser url position
+----------------------------------
+http://127.0.0.1:8000/data/f1/
+http://127.0.0.1:8000/data/f2/
+http://127.0.0.1:8000/data/f3/
+http://127.0.0.1:8000/data/f4/
+
+
+ to stop server => ctrl + c
+
+
+
+
+
+
+
+
+
+Chapter -5 => Sending Diff Response Type
+---------------------------------------------------------
+
+Step-1  website/urls.py
+------------------------------
+
+from django.conf.urls import include,url
+
+urlpatterns = [
+                 url(r'^data/',include('music.urls')),
+]
+
+
+Step-2 music/urls.py
+------------------------------
+from django.conf.urls import url
+from .import views
+
+urlpatterns = [
+
+          url(r'^f1/$',views.index,name="index"),
+          url(r'^f2/$',views.index2,name="index2"),
+          url(r'^f3/$',views.index3,name="index3"),
+          url(r'^f4/$',views.index4,name="index4"),
+]
+
+
+
+Step-3 music/views.py
+------------------------------
+from django.http import HttpResponse
+
+def index(request):
+    a = 10
+    b = 20
+    c = a+b
+    return HttpResponse('<h1 style="color:red">Function-1 Result is :'+str(c)+'</h1>')
+
+def index2(request):
+    a = 78.90
+    b = 77.678
+    c = a+b
+    return HttpResponse('<h1 style="color:green">Function-2 Result is :'+str(c)+'</h1>')
+
+def index3(request):
+    name = "Micky"    
+    return HttpResponse('<h1 style="color:blue">Function-3 Name is : '+name+'</h1>')
+
+def dummy():
+    a = 78.90
+    b = 77.678
+    c = a+b
+    return str(c)
+
+def index4(request):
+    res = dummy()
+    return HttpResponse('<h1 style="color:orange">Fourth Function Res : '+res+'</h1>')        
+
+
+
+
+Step-4  Runserver
+--------------------------
+
+==> python manage.py runserver 
+
+type in browser url position
+----------------------------------
+http://127.0.0.1:8000/data/f1/
+http://127.0.0.1:8000/data/f2/
+http://127.0.0.1:8000/data/f3/
+http://127.0.0.1:8000/data/f4/
+
+
+ to stop server => ctrl + c
+
+
+
+
+
+
+
+
+
+
+
+

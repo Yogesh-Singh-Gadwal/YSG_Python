@@ -1,0 +1,500 @@
+Chapter- 32 Displaying Images 
+------------------------------------------
+
+Step-1 go to admin panel 
+----------------------------------
+==> http:127.0.0.1:8000/admin
+add album_logo url to particular album
+
+
+Step-2 music/views.py
+------------------------------
+from django.http import HttpResponse
+from .models import Album
+#from django.template import loader
+from django.shortcuts import render
+from django.http import Http404
+from .models import Song
+from django.shortcuts import get_object_or_404
+
+
+def index(request):
+    records = Album.objects.all() 
+    return render(request,'music/index.html',{'records':records})
+
+
+def detail(request,data_id):
+    records = Album.objects.all()
+    single_record = get_object_or_404(Album,pk=data_id)
+    print(single_record.production_house)
+    data2 = single_record.song_set.all()
+    return render(request,'music/detail.html',{'single_record':single_record,'data2':data2,'records':records})
+
+
+
+
+Step-3 music/detail.html
+----------------------------------
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+           body{
+                 margin: 0px;
+           }
+           header{
+                  background-color: black;
+                  color: white;
+                  width: 100%;
+                  height: 80px;
+                  padding: 30px;
+           } 
+           nav{
+               background-color: yellowgreen;
+               width: 100%;
+               height: 30px;
+               padding: 10px;
+           }
+           section{
+                 width: 100%;
+                 height: 550px;
+                 background-color: skyblue;
+                 padding: 30px;
+           }
+           article{
+                 width: 350px;
+                 height: 450px; 
+                 background-color: lightsalmon;
+                 padding: 20px;
+                 margin: 15px;
+                 border-radius: 15px;
+                 float: left;
+           }
+           footer{
+                  background-color: black;
+                  color: white;
+                  width: 100%;
+                  height: 50px;
+                  padding: 30px;
+           }
+           a{
+             text-decoration:none;
+           }
+           article#one{
+               background-color: palevioletred;
+           }
+           article#one{
+               background-color: darkseagreen;
+           }
+    </style>
+</head>
+<body>
+        
+      <header></header>
+      <nav></nav>
+      <section>
+               <article>
+                     <h1>Album Names:</h1>
+                     {% if records %}
+                         <ul>
+                            {% for data in records %}
+                               <li>                                   
+                                   <a href="{% url 'music:detail' data.id %}">{{data.album_title}}</a>
+                                </li>
+                            {% endfor %}
+                         </ul>
+                     {% else %}
+                     <h2>Data is not present</h2>
+                     {% endif %}
+                        
+               </article>
+               <article id="two">
+                       <h2>Album Artist : {{single_record.album_artist}}</h2>
+                       <h3>Album Name : {{single_record.album_title}}</h3>
+                       <br>
+                       <img src="{{single_record.album_logo}}" width="340px" height="300px" alt="Soon it will be uploaded"> 
+               </article>
+               <article id="one">
+                <h2>Album Artist : {{single_record.album_artist}}</h2>
+                <h3>Album Name : {{single_record.album_title}}</h3>
+                <h3>Songs-List</h3>
+                <ol>
+                    {% if data2 %}
+                        {% for rec in data2 %}
+                              <li>
+                                  {{rec.song_title}} --- {{rec.song_type}}
+                              </li>
+                        {% endfor %}
+                    {% else %}
+                         <h2>Songs are not available...</h2>
+                    {% endif %}
+                </ol>
+               </article>
+      </section>
+      <footer></footer>
+</body>
+</html>
+
+
+
+
+Step-4 go to browser 
+---------------------------
+
+==> http://127.0.0.1:8000/data/3/
+
+
+
+
+
+
+
+
+Chapter-33 Login App
+----------------------------
+
+Step-1 website/urls.py
+------------------
+from django.conf.urls import include,url
+from django.contrib import admin
+
+urlpatterns = [
+                 url(r'^admin/',admin.site.urls),
+                 url(r'^data/',include('music.urls')),
+                 url(r'^stu/',include('sturegister.urls')),
+                 url(r'^login/',include('loginapp.urls')),
+                 
+]
+
+
+
+
+Step-2 website/settings.py
+-----------------------------------
+# Application definition
+
+INSTALLED_APPS = [
+    'django.contrib.admin',
+    'django.contrib.auth',
+    'django.contrib.contenttypes',
+    'django.contrib.sessions',
+    'django.contrib.messages',
+    'django.contrib.staticfiles',
+    'music',
+    'sturegister',
+    'loginapp',
+]
+
+
+
+Step-3 create new app
+---------------------------------
+
+==> python manage.py startapp loginapp
+
+
+
+
+step-4 loginapp/urls.py
+-----------------------------
+from django.conf.urls import url
+from .import views
+
+app_name ='loginapp'
+urlpatterns = [
+          
+          url(r'^$',views.dataIn,name="dataIn"),
+          url(r'^checkdata$',views.dataIn,name="dataIn"),         
+
+]
+
+
+
+
+step-4 loginapp/models.py
+-----------------------------------
+from django.db import models
+
+# Create your models here.
+class LoginAppData(models.Model):
+    username = models.CharField(max_length=10)
+    password = models.CharField(max_length=15)
+
+    def __str__(self):
+        return self.username+' -- '+self.password 
+
+        
+
+
+Step-5 API shell Script 
+----------------------------------
+==> python manage.py shell
+
+>>> from loginapp.models import LoginAppData
+>>> LoginAppData.objects.all()
+<QuerySet []>
+>>> l1 = LoginAppData()        
+>>> l1.username = 'micky'
+>>> l1.password = 'abc123'
+>>> l1.save()
+>>> LoginAppData.objects.all()
+<QuerySet [<LoginAppData: micky -- abc123>]>
+>>> l2 = LoginAppData()        
+>>> l2.username = 'akira'  
+>>> l2.password = 'xyz123' 
+>>> l2.save()
+>>> LoginAppData.objects.all()
+<QuerySet [<LoginAppData: micky -- abc123>, <LoginAppData: akira -- xyz123>]>
+
+
+
+
+
+Step-6 loginapp/views.py
+-------------------------------------
+from django.shortcuts import render
+from .models import LoginAppData
+
+# Create your views here.
+def dataIn(request):
+    if request.method=='POST':
+        username = request.POST['uname']
+        print(username)
+        password =  request.POST['psw']
+        print(password)
+        login_data = LoginAppData.objects.all()
+
+        logdata = 0
+        for login_records in login_data:
+            if username == login_records.username and password == login_records.password:
+                logdata += 1
+            else:
+                pass
+        if logdata <= 0:
+            logdata=0
+            context={
+                "failed_data":"Your Record is not present in DataBase"
+            }
+            return render(request,'loginapp/failed.html',context)
+        elif logdata > 0:
+            logdata=0
+            context={
+                "success_data":"Welcome to Django Session....."
+            }
+            return render(request,'loginapp/success.html',context)                
+    else:
+        return render(request,'loginapp/login.html')
+
+def dataOut(request):
+    pass
+
+
+
+
+
+step-7 loginapp/login.html
+=====================
+
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+body {font-family: Arial, Helvetica, sans-serif;}
+form {border: 3px solid #f1f1f1;}
+
+input[type=text], input[type=password] {
+  width: 100%;
+  padding: 12px 20px;
+  margin: 8px 0;
+  display: inline-block;
+  border: 1px solid #ccc;
+  box-sizing: border-box;
+}
+
+button {
+  background-color: #4CAF50;
+  color: white;
+  padding: 14px 20px;
+  margin: 8px 0;
+  border: none;
+  cursor: pointer;
+  width: 100%;
+}
+
+button:hover {
+  opacity: 0.8;
+}
+
+.cancelbtn {
+  width: auto;
+  padding: 10px 18px;
+  background-color: #f44336;
+}
+
+.imgcontainer {
+  text-align: center;
+  margin: 24px 0 12px 0;
+}
+
+img.avatar {
+  width: 30%;
+  border-radius: 50%;
+}
+
+.container {
+  padding: 16px;
+}
+
+span.psw {
+  float: right;
+  padding-top: 16px;
+}
+
+/* Change styles for span and cancel button on extra small screens */
+@media screen and (max-width: 300px) {
+  span.psw {
+     display: block;
+     float: none;
+  }
+  .cancelbtn {
+     width: 100%;
+  }
+}
+div#one{
+    width: 700px;
+    height: 500px;
+    margin-left: auto;
+    margin-right: auto;
+}
+h2{
+    font-size: 60px;
+    color: red;
+}
+</style>
+</head>
+<body bgcolor="powderblue">
+
+<h2 align="center">Login Form</h2>
+<div id="one">
+        <form action="checkdata" method="post">
+            {% csrf_token %}
+        <div class="imgcontainer">
+            <img src="https://www.w3schools.com/HOWTO/img_avatar2.png" alt="Avatar" class="avatar" width="100px" height="200px">
+        </div>
+
+        <div class="container">
+            <label for="uname"><b>Username</b></label>
+            <input type="text" placeholder="Enter Username" name="uname" required>
+
+            <label for="psw"><b>Password</b></label>
+            <input type="password" placeholder="Enter Password" name="psw" required>
+                
+            <button type="submit">Login</button>
+           
+        </div>
+
+  
+        </form>
+</div>
+</body>
+</html>
+
+
+
+
+
+step-8 loginapp/success.html
+=====================
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    
+      <br><br>
+
+      <h1>Result is : {{success_data}}</h1>
+     
+</body>
+</html>
+
+
+
+
+
+
+
+
+step-9 loginapp/failed.html
+
+====================
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    
+      <br><br>
+
+      <h1>Result is : {{failed_data}}</h1>
+     
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,361 @@
+Chapter - 18  - Render Template Works
+-----------------------------------------------------
+
+Step-1 music/views.py
+------------------------------
+from django.http import HttpResponse
+from .models import Album
+#from django.template import loader
+from django.shortcuts import render
+
+def index(request):
+    records = Album.objects.all() 
+    return render(request,'music/index.html',{'records':records})
+    '''
+    context = {
+            "records":records,
+    }
+    '''
+    #template = loader.get_template('music/index.html')
+    #return HttpResponse(template.render(context,request))
+    
+
+
+def detail(request,data_id):
+    single_record = Album.objects.get(pk=data_id)
+    print(single_record)
+    return HttpResponse('''<br><br><h1 style="color:green">You have selected Album-ID : '''+str(data_id)+'''<br><br>
+    You have selected Album Name is :'''+str(single_record)+'''</h1>''')
+
+
+
+
+Step-2 Go to CMD(terminal)
+----------------------------------------
+
+==> python manage.py runserver
+==> http://127.0.0.1:8000/data/
+
+
+
+
+
+
+
+Chapter - 19     How to solve DoesNotExist Error using HTTP404
+-------------------
+
+
+Step-1   music/views.py
+-------------------------------
+from django.http import HttpResponse
+from .models import Album
+#from django.template import loader
+from django.shortcuts import render
+from django.http import Http404
+
+def index(request):
+    records = Album.objects.all() 
+    return render(request,'music/index.html',{'records':records})
+    '''
+    context = {
+            "records":records,
+    }
+    '''
+    #template = loader.get_template('music/index.html')
+    #return HttpResponse(template.render(context,request))
+    
+
+
+def detail(request,data_id):
+    try:
+       single_record = Album.objects.get(pk=data_id)
+       print(single_record)
+       return HttpResponse('''<br><br><h1 style="color:green">You have selected Album-ID : '''+str(data_id)+'''<br><br>
+       You have selected Album Name is :'''+str(single_record)+'''</h1>''')
+    except Album.DoesNotExist:
+       raise Http404("Soon will add this record...")
+     
+
+
+
+Step-2 Go to CMD(terminal)
+----------------------------------------
+
+==> python manage.py runserver
+==> http://127.0.0.1:8000/data/
+
+==> http://127.0.0.1:8000/data/1
+==> http://127.0.0.1:8000/data/2
+==> http://127.0.0.1:8000/data/3
+==> http://127.0.0.1:8000/data/4
+==> http://127.0.0.1:8000/data/25
+
+
+
+
+
+
+
+
+
+
+Chapter 20  Another way to handle Exception without Http404
+---------------------------------------------------------------------------------
+
+
+Step-1 music/views.py 
+-----------------------------
+def detail(request,data_id):
+    try:
+       single_record = Album.objects.get(pk=data_id)
+       print(single_record)
+       return HttpResponse('''<br><br><h1 style="color:green">You have selected Album-ID : '''+str(data_id)+'''<br><br>You have selected Album Name is :'''+str(single_record)+'''</h1>''')
+    except Album.DoesNotExist:
+       return HttpResponse('<br><br><h1 style="color:red">Soon this album will be added</h1>')
+
+
+Step-2 Go to CMD(terminal)
+----------------------------------------
+
+==> python manage.py runserver
+==> http://127.0.0.1:8000/data/
+
+==> http://127.0.0.1:8000/data/1
+==> http://127.0.0.1:8000/data/2
+==> http://127.0.0.1:8000/data/3
+==> http://127.0.0.1:8000/data/4
+==> http://127.0.0.1:8000/data/25
+
+
+
+
+
+
+
+
+
+
+
+Chapter-21    -> Creating New Table
+-------------------------------------------------
+
+Step-1 music/models.py
+-------------------------------
+from django.db import models
+
+# Create your models here.
+class Album(models.Model):
+    album_title = models.CharField(max_length=50)
+    album_artist = models.CharField(max_length=50)
+    production_house = models.CharField(max_length=50)
+    album_logo = models.CharField(max_length=1150)
+
+    def __str__(self):
+        return self.album_artist+' -- '+self.album_title
+
+class Song(models.Model):
+    album = models.ForeignKey(Album,on_delete=models.CASCADE)
+    song_title = models.CharField(max_length=50)
+    song_type = models.CharField(max_length=10)
+
+    def __str__(self):
+        return self.song_title+' -- '+self.song_type        
+
+
+
+Step-2 Go to CMD(terminal)
+----------------------------------------
+
+==> python manage.py makemigrations music
+==> python manage.py migrate
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Chapter 22  -> Entering Another Tables Records 
+----------------------------------------------------------------
+
+Step-1 Go to CMD(terminal)
+---------------------------------------
+
+==> python manage.py shell
+
+>>> from music.models import Album,Song
+>>> Album.objects.all()
+<QuerySet [<Album: Arijit_Singh -- Love Aaj Kal>, <Album: Siddharth Sriram -- Emai Poyave>, <Album: Sonu Nigam -- Chanda Ke doli>, <Album: DSp -- Mirchi>, <Album: Armaan Malik -- Jab Tak>]>
+>>> a1 = Album.objects.get(pk=1)
+>>> a1.album_title
+'Love Aaj Kal'
+>>> song = Song()
+>>> song.album = a1
+>>> song_title = 'Shayad Mera Khyam'
+>>> song.song_title = 'Shyad Mera Khyal'
+>>> song.song_type = 'mp3'
+>>> song.save()
+>>> a1.song_set.all()
+<QuerySet [<Song: Shyad Mera Khyal -- mp3>]>
+
+
+
+>>> a1.song_set.create(song_title='Haa Mai Galat',song_type='mp3')
+<Song: Haa Mai Galat -- mp3>
+>>> a1.song_set.create(song_title='Rahogi Meri',song_type='mp3')    
+<Song: Rahogi Meri -- mp3>
+>>> a1.song_set.all()
+<QuerySet [<Song: Shyad Mera Khyal -- mp3>, <Song: Haa Mai Galat -- mp3>, <Song: Rahogi Meri -- mp3>]>
+>>> a1.song_set.create(song_title='Haan Tum Ho',song_type='mp3')   
+<Song: Haan Tum Ho -- mp3>
+>>> a1.song_set.create(song_title='Yeh Dooriyan',song_type='mp3') 
+<Song: Yeh Dooriyan -- mp3>
+>>> a1.song_set.all()                                             
+<QuerySet [<Song: Shyad Mera Khyal -- mp3>, <Song: Haa Mai Galat -- mp3>, <Song: Rahogi Meri -- mp3>, <Song: Haan Tum Ho -- mp3>, <Song: Yeh Dooriyan -- mp3>]>
+>>> a1.song_set.count()                                         
+5
+>>> a1.song_set.create(song_title='Aur Tanha',song_type='mp3')    
+<Song: Aur Tanha -- mp3>
+>>> a1.song_set.count()
+6
+
+
+
+>>> a2 = Album.objects.get(pk=2)
+>>> a2.album_title
+'Emai Poyave'
+>>> a2.song_set.create(song_title='Inkem Inkem Kaava',song_type='mp3') 
+<Song: Inkem Inkem Kaava -- mp3>
+>>> a2.song_set.create(song_title='Yaen Ennai Prindhaai',song_type='mp3') 
+<Song: Yaen Ennai Prindhaai -- mp3>
+>>> a2.song_set.create(song_title='Kadhaippoma',song_type='mp3')          
+<Song: Kadhaippoma -- mp3>
+>>> a2.song_set.create(song_title='Maguva Maguva',song_type='mp3') 
+<Song: Maguva Maguva -- mp3>
+>>> a2.song_set.create(song_title='Maate Vinadhuga',song_type='mp3') 
+<Song: Maate Vinadhuga -- mp3>
+>>> a2.song_set.create(song_title='Maruvaarthai',song_type='mp3')    
+<Song: Maruvaarthai -- mp3>
+>>> a2.song_set.create(song_title='Kannaana Kanney',song_type='mp3') 
+<Song: Kannaana Kanney -- mp3>
+>>>
+>>> 
+>>> 
+>>> 
+>>> 
+>>> a1.song_set.count()                                                   
+6
+>>> a2.song_set.count() 
+7
+>>> a1.song_set.all()                                                     
+<QuerySet [<Song: Shyad Mera Khyal -- mp3>, <Song: Haa Mai Galat -- mp3>, <Song: Rahogi Meri -- mp3>, <Song: Haan Tum Ho -- mp3>, <Song: Yeh Dooriyan -- mp3>, <Song: Aur Tanha -- mp3>]>
+>>> a2.song_set.all() 
+<QuerySet [<Song: Inkem Inkem Kaava -- mp3>, <Song: Yaen Ennai Prindhaai -- mp3>, <Song: Kadhaippoma -- mp3>, <Song: Maguva Maguva -- mp3>, <Song: Maate Vinadhuga -- mp3>, <Song: Maruvaarthai -- mp3>, <Song: Kannaana Kanney -- mp3>]>
+
+>>>exit()
+
+
+
+
+
+
+
+
+
+
+
+Chapter 23  -> Go to Super User to Enter Songs Records
+--------------------------------------------------------------------------
+
+Step-1 music/admin.py
+------------------------------
+from django.contrib import admin
+from .models import Album
+from .models import Song
+
+# Register your models here.
+admin.site.register(Album)
+admin.site.register(Song)
+
+
+Step-2 Go to CMD(terminal)
+------------------------------------
+
+==> python manage.py runserver
+
+==> http://127.0.0.1:8000/admin
+
+Enter New Songs 
+
+
+Step-3 Go to CMD(terminal)
+---------------------------------------
+
+==> python manage.py shell
+
+>>> from music.models import Album,Song
+>>> a1 = Album.objects.get(pk=1)
+>>> a2 = Album.objects.get(pk=2) 
+>>> a3 = Album.objects.get(pk=3) 
+>>> a4 = Album.objects.get(pk=4) 
+>>> a1.song_set.all()
+<QuerySet [<Song: Shyad Mera Khyal -- mp3>, <Song: Haa Mai Galat -- mp3>, <Song: Rahogi Meri -- mp3>, <Song: Haan Tum Ho -- mp3>, <Song: Yeh Dooriyan -- mp3>, <Song: Aur Tanha -- mp3>]>
+>>> a1.song_set.count() 
+6   
+>>> a2.song_set.all()   
+<QuerySet [<Song: Inkem Inkem Kaava -- mp3>, <Song: Yaen Ennai Prindhaai -- mp3>, <Song: Kadhaippoma -- mp3>, <Song: Maguva Maguva -- mp3>, <Song: Maate Vinadhuga -- mp3>, <Song: Maruvaarthai -- mp3>, <Song: Kannaana Kanney -- mp3>]>
+>>> a2.song_set.count() 
+7   
+>>> a3.song_set.all()   
+<QuerySet [<Song: Bole Chudiyan -- mp3>, <Song: Sandese Aate hai -- mp3>, <Song: Tera Rang Balle Balle -- mp3>, <Song: Dil Dooba -- mp3>, <Song: Mujhse Shasdi Karogi -- mp3>, <Song: Dil Ne Yeh Kaha Dil Se -- mp3>, <Song: Kinna Sona Tainu Rab Ne -- mp3>, <Song: Sab Kuch bhula Diya -- mp3>, <Song: Abhi Mujh Mai Kahin -- mp3>, <Song: Maahi Ve -- mp3>, <Song: Aisa Deewana -- mp3>]>
+>>> a3.song_set.count() 
+11
+>>> a4.song_set.all()   
+<QuerySet []>
+>>> a4.song_set.count() 
+0
+>>> Exit()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
